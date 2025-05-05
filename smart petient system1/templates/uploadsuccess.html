@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Success - Patient Details</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f7;
+      padding: 30px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .patient-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 600px;
+    }
+
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h2>Patient Details</h2>
+  <div id="patientDetailsContainer"></div>
+  <button onclick="downloadPDF()">Download PDF</button>
+
+  <script>
+    let currentData = [];
+
+    window.onload = () => {
+      const hospitalname = localStorage.getItem("hospitalname");
+      const userid = localStorage.getItem("userid");
+      const type = localStorage.getItem("selectedPatientType");
+
+      fetch('/api/patient-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ hospitalname, userid, type })
+      })
+      .then(res => res.json())
+      .then(data => {
+        currentData = data.patients;
+        const container = document.getElementById('patientDetailsContainer');
+        container.innerHTML = "";
+
+        if (currentData && currentData.length > 0) {
+          currentData.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'patient-card';
+            div.innerHTML = `
+ <strong>Name:</strong> ${p.name}<br>
+ <strong>Aadhaar:</strong> ${p.aadhaar}<br>
+ <strong>Disease:</strong> ${p.disease}<br>
+ <strong>Symptoms:</strong> ${p.symptoms}<br>
+ <strong>Treatment:</strong> ${p.treatment}<br>
+ <strong>Medication:</strong> ${p.medication}<br>
+ <strong>Patient Type:</strong> ${p.patienttype}<br>
+ <strong>Timestamp:</strong> ${new Date(p.timestamp).toLocaleString()}<br>`;
+  container.appendChild(div);
+          });
+        } else {
+          container.innerHTML = "<p>No patient records found.</p>";
+        }
+      });
+    };
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const hospitalname = localStorage.getItem("hospitalname");
+      const patienttype = localStorage.getItem("selectedPatientType");
+      let y = 10;
+
+      doc.setFontSize(14);
+      doc.text(`Hospital: ${hospitalname}`, 10, y); y += 10;
+      doc.text(`Patient Type: ${patienttype}`, 10, y); y += 10;
+
+      currentData.forEach((entry, index) => {
+        y += 10;
+        doc.setFontSize(12);
+        doc.text(`Patient ${index + 1}`, 10, y); y += 8;
+        doc.setFontSize(10);
+        doc.text(`Name: ${entry.name}`, 10, y); y += 6;
+        doc.text(`Aadhaar: ${entry.aadhaar}`, 10, y); y += 6;
+        doc.text(`Disease: ${entry.disease}`, 10, y); y += 8;
+        doc.text(`Symptoms: ${entry.symptoms}`, 10, y); y += 6;
+        doc.text(`Treatment: ${entry.treatment}`, 10, y); y += 6;
+        doc.text(`Medication: ${entry.medication}`, 10, y); y += 6;
+doc.text(`Patient Type: ${entry.patienttype}`, 10, y); y += 6;
+        doc.text(`Timestamp: ${new Date(entry.timestamp).toLocaleString()}`, 10, y); y += 10;
+
+        if (y > 270) {
+          doc.addPage();
+          y = 10;
+        }
+      });
+
+      doc.save(`${patienttype}_patients.pdf`);
+    }
+  </script>
+</body>
+</html>

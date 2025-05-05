@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Registration Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    .form-container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 5px;
+      display: inline-block;
+    }
+
+    input[type="text"], input[type="number"], input[type="tel"], select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 100%;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+
+    #barcodeSection {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Patient Registration Form</h2>
+    <form id="registrationForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="age">Age:</label>
+      <input type="number" id="age" name="age" required>
+
+      <label for="aadhaar">Aadhaar Number:</label>
+      <input type="text" id="aadhaar" name="aadhaar" maxlength="12" pattern="\d{12}" required>
+
+      <label for="gender">Gender:</label>
+      <select id="gender" name="gender" required>
+        <option value="">Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label for="phone">Phone Number:</label>
+      <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required>
+
+      <input type="submit" value="Register">
+    </form>
+
+    <!-- ✅ Barcode display section -->
+    <div id="barcodeSection">
+      <h3>Patient Registered Successfully!</h3>
+      <p><strong>Generated Barcode:</strong> <span id="barcodeText"></span></p>
+      <svg id="barcodeImage"></svg>
+    </div>
+  </div>
+
+  <!-- JsBarcode CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+  <script>
+    document.getElementById("registrationForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+    
+      const patientData = {
+  name: document.getElementById("name").value,
+  age: document.getElementById("age").value,
+  aadhaar: document.getElementById("aadhaar").value,
+  gender: document.getElementById("gender").value,
+  phone: document.getElementById("phone").value,
+  hospitalname: localStorage.getItem("hospitalname"),
+  userid: localStorage.getItem("userid")
+};
+
+    
+      fetch("/api/register-patient", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patientData),
+      })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.barcode) {
+          // Show barcode section
+          document.getElementById("barcodeText").textContent = data.barcode;
+          document.getElementById("barcodeSection").style.display = "block";
+
+          // Generate barcode image
+          JsBarcode("#barcodeImage", data.barcode, {
+            format: "CODE128",
+            lineColor: "#000",
+            width: 2,
+            height: 60,
+            displayValue: true
+          });
+
+          // Optional: Reset form
+          document.getElementById("registrationForm").reset();
+        } else {
+          alert(data.message || "Registration failed.");
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

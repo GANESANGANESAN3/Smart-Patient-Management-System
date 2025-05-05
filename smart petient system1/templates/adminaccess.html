@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard | Patient Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #eef2f5;
+      color: #333;
+    }
+
+    header {
+      background-color: #1f2937;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    nav a {
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 17px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    nav a:hover {
+      background-color: #10b981;
+      color: white;
+    }
+
+    main {
+  padding: 50px 20px;
+  text-align: center;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+
+    h1 {
+      font-size: 32px;
+      color: #1f2937;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #4b5563;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      min-width: 260px;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h2 {
+      font-size: 36px;
+      margin-bottom: 8px;
+      color: #10b981;
+    }
+
+    .card p {
+      font-size: 16px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+      nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/patientregister">Patient Register Form</a>
+      <a href="/register">Patient Details</a>
+      <a href="/diseaseupload">Patient Disease Upload</a>
+      <a href="/hospitalreport">Hospital-wise Report</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Welcome to the Admin Access Page</h1>
+    <p>Please use the navigation links above to manage patient data effectively.</p>
+
+    <div class="stats">
+      <div class="card">
+        <h2 id="adminCount">Loading...</h2>
+        <p>Total Admin Accounts</p>
+      </div>
+      <div class="card">
+        <h2 id="patientCount">Loading...</h2>
+        <p>Total Patient Records</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/dashboard-stats');
+        const data = await res.json();
+
+        document.getElementById("adminCount").textContent = data.totalAdmins ?? '0';
+        document.getElementById("patientCount").textContent = data.totalPatients ?? '0';
+      } catch (err) {
+        console.error("Failed to load stats:", err);
+        document.getElementById("adminCount").textContent = "Error";
+        document.getElementById("patientCount").textContent = "Error";
+      }
+    }
+
+    loadStats();
+  </script>
+</body>
+</html>

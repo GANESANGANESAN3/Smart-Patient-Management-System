@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Patient Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .form-container, .result-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    h2 {
+      text-align: center;
+    }
+    .disease-block {
+      margin-top: 15px;
+      padding: 10px;
+      background: #e8f0fe;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Search Patient Disease Info</h2>
+  
+    <h3>Search by Aadhaar & Name</h3>
+    <input type="text" id="aadhaar" placeholder="Enter Aadhaar Number">
+    <input type="text" id="name" placeholder="Enter Name">
+    <button onclick="searchByAadhaarName()">Search</button>
+  
+    <hr style="margin: 20px 0;">
+  
+    <h3>Or Search by Barcode</h3>
+    <input type="text" id="barcode" placeholder="Enter Barcode">
+    <button onclick="searchByBarcode()">Search</button>
+  </div>
+  
+  
+<div class="result-container" id="result" style="display: none;">
+  <h2>Patient Info</h2>
+  <p><strong>Name:</strong> <span id="pname"></span></p>
+  <p><strong>Aadhaar:</strong> <span id="paadhaar"></span></p>
+  <p><strong>Age:</strong> <span id="page"></span></p>
+  <p><strong>Gender:</strong> <span id="pgender"></span></p>
+  <p><strong>Phone:</strong> <span id="pphone"></span></p>
+  <div id="diseasesSection"></div>
+</div>
+<button onclick="downloadPDF()" id="downloadBtn" style="display: none;">Download PDF</button>
+<script>
+  async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const resultSection = document.getElementById("result");
+    const pdf = new jsPDF("p", "pt", "a4");
+
+    await html2canvas(resultSection, {
+      scale: 2
+    }).then(canvas => {
+      const imgData = canvas.toDataURL("image/png");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("patient-details.pdf");
+    });
+  }
+
+  async function searchByAadhaarName() {
+    const aadhaar = document.getElementById("aadhaar").value.trim();
+    const name = document.getElementById("name").value.trim();
+
+    if (!aadhaar || !name) {
+      alert("Please enter both Aadhaar and Name.");
+      return;
+    }
+
+    fetchAndDisplay({ aadhaar, name });
+  }
+
+  async function searchByBarcode() {
+    const barcode = document.getElementById("barcode").value.trim();
+
+    if (!barcode) {
+      alert("Please enter Barcode.");
+      return;
+    }
+
+    fetchAndDisplay({ barcode });
+  }
+
+  async function fetchAndDisplay(payload) {
+    const res = await fetch("/api/patient-full-details", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    const result = document.getElementById("result");
+
+    if (data.success) {
+      result.style.display = "block";
+      document.getElementById("downloadBtn").style.display = "inline-block";
+      document.getElementById("pname").textContent = data.patient.name;
+      document.getElementById("paadhaar").textContent = data.patient.aadhaar;
+      document.getElementById("page").textContent = data.patient.age;
+      document.getElementById("pgender").textContent = data.patient.gender;
+      document.getElementById("pphone").textContent = data.patient.phone;
+
+      const diseasesDiv = document.getElementById("diseasesSection");
+      diseasesDiv.innerHTML = "<h3>Disease Records:</h3>";
+      data.diseases.forEach(d => {
+        diseasesDiv.innerHTML += `
+          <div class="disease-block">
+            <p><strong>Disease:</strong> ${d.disease}</p>
+            <p><strong>Symptoms:</strong> ${d.symptoms}</p>
+            <p><strong>Treatment:</strong> ${d.treatment}</p>
+            <p><strong>Medication:</strong> ${d.medication || "N/A"}</p>
+            <p><strong>Patient Type:</strong> ${d.patienttype || "N/A"}</p>
+            <p><strong>Hospital Name:</strong> ${d.hospitalname || "N/A"}</p>
+            <p><strong>Date:</strong> ${new Date(d.timestamp).toLocaleString()}</p>
+            ${d.report_filename ? `<p><strong>Report File:</strong> <a href="/uploads/${d.report_filename}" target="_blank">View Report</a></p>` : ""}
+          </div>`;
+      });
+    } else {
+      alert(data.message || "No records found.");
+      result.style.display = "none";
+    }
+  }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+</body>
+</html>

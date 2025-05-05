@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Patient Slider</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f0f0;
+    }
+    .background{
+        background-color: #2f2f5f;
+    }
+    .slider-container {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      max-width: 1200px;
+      margin: auto;
+      background-color: #2f2f5f;
+      color: white;
+      overflow: hidden;
+      border-radius: 10px;
+      position: relative;
+    }
+    .admin{
+      text-decoration:none;
+      color: aliceblue;
+    }
+    .text-content {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .text-content h2 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    .text-content p {
+      font-size: 1.1em;
+      line-height: 1.6em;
+    }
+    .btn {
+      margin-top: 30px;
+      background-color: #ffc400;
+      color: black;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      width: fit-content;
+    }
+    .image-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2em;
+      color: white;
+      background-color: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .arrow.left {
+      left: 10px;
+    }
+    .arrow.right {
+      right: 10px;
+    }
+    @media (max-width: 768px) {
+      .slider-container {
+        flex-direction: column;
+      }
+      .image-container, .text-content {
+        width: 100%;
+      }
+      .text-content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+    <div class="background">
+    <header style="background-color: #004080; padding: 15px 0; color: white;">
+        <nav style="display: flex; justify-content: space-around; align-items: center; font-family: Arial, sans-serif;">
+            <a href="#" style="display: flex; align-items: center; color: white; text-decoration: none; font-weight: bold;">
+                <img src="/static/media/WhatsApp Image 2025-04-10 at 8.18.28 PM.jpeg  "alt="Logo" style="height: 40px; margin-right: 10px;">
+                Smart Patient Database
+            </a>
+            <a href="{{ url_for('admin_signin') }}" class="admin">Admin Access</a>  <!-- ✅ Flask route -->
+            <a href="#contact" style="color: white; text-decoration: none;">Contact Us</a>
+        </nav>
+    </header>
+    
+  <div class="slider-container" id="slider">
+    <div class="arrow left" onclick="prevSlide()">&#8249;</div>
+    
+    <div class="text-content">
+      <h2 id="title">Loading...</h2>
+      <p id="description">Please wait...</p>
+    </div>
+
+    <div class="image-container">
+      <img id="slideImage" src="/static/media/second.jpeg" alt="Slider image">
+    </div>
+
+    <div class="arrow right" onclick="nextSlide()">&#8250;</div>
+  </div>
+    </div>
+
+    <section id="contact" style="padding: 40px; background-color: #f0f8ff; font-family: Arial, sans-serif;">
+        <h2 style="text-align: center; color: #004080;">Contact Us</h2>
+        <p style="text-align: center; max-width: 600px; margin: 0 auto 30px; color: #333;">
+          For any queries, feedback, or collaboration opportunities regarding the Smart Patient System, feel free to reach out to us.
+        </p>
+      
+        <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+          <p><strong>Developed by:</strong> [Your Full Name]</p>
+          <p><strong>Department:</strong> Electronics and Communication Engineering (ECE)</p>
+          <p><strong>Institution:</strong> [Your College/University Name]</p>
+          <p><strong>Email:</strong> your.email@example.com</p>
+          <p><strong>Phone:</strong> +91-XXXXXXXXXX</p>
+        </div>
+    </section>
+      
+  <footer style="background-color: #f0f8ff; text-align: center; padding: 20px; font-size: 14px; color: #555;">
+    <p>&copy; 2025 Smart Patient System. All rights reserved.</p>
+    <p>Developed with ❤️ by students of [Your College/University Name], ECE Department.</p>
+  </footer>  
+
+  <script>
+const basePath = "/static/media/";
+const slides = [
+  {
+    title: "About – Smart Patient Database",
+    content: `Smart Patient Database is an innovative software platform designed to store and manage a patient's complete medical history in one secure place. It allows hospitals to upload a patient's health records—including past treatments, surgeries, medications, diseases, and current health status—with the patient's acknowledgment.
+
+Each patient is identified using their Aadhaar ID, ensuring that their records are linked uniquely and can be accessed by authorized healthcare providers when needed.`,
+    image: basePath + "second.jpeg"
+  },
+  {
+    title: "How It Works",
+    content: `Admin Access for Hospitals: Each hospital has an authorized admin who uploads patient data to the platform.
+
+Patient Consent: Records are added only with the patient’s acknowledgment.
+
+Unique Identification: The patient’s Aadhaar ID is used to securely link and access their records.`,
+    image: basePath + "thried.jpeg"  // OR "third.jpeg" if it's a typo
+  },
+  {
+    title: "Meet the Team",
+    content: "This project is developed by a passionate student/team from [Your College/University Name], currently pursuing B.E. in Electronics and Communication Engineering. With a strong interest in solving real-world problems using software and IoT, we created this system to bring a positive impact to India’s healthcare system.",
+    image: basePath + "frist.jpeg"  // OR "first.jpeg" if needed
+  }
+];
+
+    let currentIndex = 0;
+    const titleEl = document.getElementById("title");
+    const descEl = document.getElementById("description");
+    const imgEl = document.getElementById("slideImage");
+    const slider = document.getElementById("slider");
+
+    function showSlide(index) {
+      const slide = slides[index];
+      titleEl.innerText = slide.title;
+      descEl.innerText = slide.content;
+      imgEl.src = slide.image;
+      imgEl.alt = slide.title;
+    }
+
+    function nextSlide() {
+      currentIndex = (currentIndex + 1) % slides.length;
+      showSlide(currentIndex);
+    }
+
+    function prevSlide() {
+      currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+      showSlide(currentIndex);
+    }
+
+    let autoSlide;
+
+    function startAutoSlide() {
+      stopAutoSlide();
+      autoSlide = setInterval(nextSlide, 5000);
+    }
+
+    function stopAutoSlide() {
+      if (autoSlide) clearInterval(autoSlide);
+    }
+
+    slider.addEventListener("mouseenter", stopAutoSlide);
+    slider.addEventListener("mouseleave", startAutoSlide);
+
+    showSlide(currentIndex);
+    startAutoSlide();
+  </script>
+</body>
+</html>

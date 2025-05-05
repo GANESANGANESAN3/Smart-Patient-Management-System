@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Disease Upload</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f4f4;
+      padding: 40px;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      padding: 10px;
+      border: none;
+      width: 100%;
+      cursor: pointer;
+    }
+    .timestamp {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #555;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h2 style="text-align:center;">Patient Disease Upload</h2>
+
+  <div class="timestamp">
+    Current Time: <span id="currentTime"></span>
+  </div>
+
+  <form id="diseaseForm" enctype="multipart/form-data">
+    <label for="aadhaar">Select Patient:</label>
+    <select id="aadhaar" name="aadhaar" required></select>
+
+    <label for="hospitalname">Hospital Name:</label>
+    <input type="text" id="hospitalname" name="hospitalname" required>
+
+    <label for="disease">Disease Name:</label>
+    <input type="text" id="disease" name="disease" required>
+
+    <label for="symptoms">Symptoms:</label>
+    <textarea id="symptoms" name="symptoms" required></textarea>
+
+    <label for="treatment">Treatment:</label>
+    <textarea id="treatment" name="treatment" required></textarea>
+
+    <label for="medication">Medication Details:</label>
+    <textarea id="medication" name="medication" required></textarea>
+
+    <label for="patienttype">Patient Type:</label>
+    <select id="patienttype" name="patienttype" required>
+      <option value="">-- Select Type --</option>
+      <option value="inpatient">Inpatient</option>
+      <option value="outpatient">Outpatient</option>
+    </select>
+
+    <label for="report">Upload Report (PDF/Image):</label>
+    <input type="file" id="report" name="report" accept=".pdf,.jpg,.jpeg,.png" required>
+
+    <input type="hidden" id="timestamp" name="timestamp" />
+
+    <button type="submit">Upload</button>
+  </form>
+
+  <script>
+    function updateTime() {
+      const now = new Date();
+      const formatted = now.toLocaleString();
+      document.getElementById('currentTime').textContent = formatted;
+      document.getElementById('timestamp').value = now.toISOString();
+    }
+    updateTime();
+
+    // Fetch patient list
+    let patientMap = {};
+    fetch('/api/patients')
+      .then(res => res.json())
+      .then(data => {
+        const select = document.getElementById('aadhaar');
+        data.forEach(p => {
+          patientMap[p.aadhaar] = p;
+          const opt = document.createElement('option');
+          opt.value = p.aadhaar;
+          opt.textContent = `${p.name} - ${p.aadhaar}`;
+          select.appendChild(opt);
+        });
+      });
+
+    // Autofill hospital name on patient selection
+    document.getElementById('aadhaar').addEventListener('change', function () {
+      const selected = patientMap[this.value];
+      if (selected) {
+        document.getElementById('hospitalname').value = selected.hospitalname || '';
+      }
+    });
+
+    // Form submission
+    document.getElementById('diseaseForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      updateTime();
+
+      const form = document.getElementById('diseaseForm');
+      const formData = new FormData(form);
+      formData.append('userid', localStorage.getItem("userid"));
+
+      fetch('/api/upload-disease', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message === "Disease info uploaded successfully!") {
+          alert('Upload successful!');
+          window.location.href = "/adminaccess";
+        } else {
+          alert('Upload failed. Please try again.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

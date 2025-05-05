@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hospital Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eaf2f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    .report-form, .result-box {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input[type="submit"] {
+      width: 100%;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #2980b9;
+    }
+
+    .result-box {
+      display: none;
+      text-align: left;
+    }
+
+    .result-box p {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="report-form">
+    <h2>Hospital Report Access</h2>
+    <form id="hospitalForm">
+      <label for="hospital-name">Hospital Name</label>
+      <input type="text" id="hospital-name" required>
+
+      <label for="admin-id">Admin ID</label>
+      <input type="text" id="admin-id" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" required>
+
+      <button type="button" id="viewReportBtn">View Report</button>
+
+    </form>
+  </div>
+
+  <div class="result-box" id="reportResult">
+    <h2>Patient Report</h2>
+    <p><strong>Total Patients:</strong> <span id="totalPatients">-</span></p>
+    <p><strong>Inpatients:</strong> <span id="inpatients">-</span></p>
+    <p><strong>Outpatients:</strong> <span id="outpatients">-</span></p> </div>
+    <script>
+      document.getElementById("viewReportBtn").addEventListener("click", function () {
+        const hospitalname = document.getElementById("hospital-name").value;
+        const userid = document.getElementById("admin-id").value;
+        const password = document.getElementById("password").value;
+      
+        // Save credentials for future access
+        localStorage.setItem("hospitalname", hospitalname);
+        localStorage.setItem("userid", userid);
+      
+        fetch('/api/hospital-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hospitalname, userid, password })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Store report data
+            localStorage.setItem("reportData", JSON.stringify(data));
+      
+            // Redirect to new report page
+            window.location.href = "/viewreport";
+          } else {
+            alert("Invalid credentials or no data found.");
+          }
+        });
+      });
+      </script>
+      
+    
+</body>
+</html>

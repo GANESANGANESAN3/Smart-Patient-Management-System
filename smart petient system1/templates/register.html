@@ -48,7 +48,7 @@
     <hr style="margin: 20px 0;">
   
     <h3>Or Search by Barcode</h3>
-    <input type="text" id="barcode" placeholder="Enter Barcode">
+    <input type="text" id="barcode" placeholder="Enter Barcode" autofocus />
     <button onclick="searchByBarcode()">Search</button>
   </div>
   
@@ -93,7 +93,13 @@
 
     fetchAndDisplay({ aadhaar, name });
   }
-
+  const barcode1 = document.getElementById("barcode").addEventListener('keypress',function(e){
+    if(e.key='Enter'){
+       barcode1=this.value;
+       this.value='';
+    }
+    fetchAndDisplay({barcode1});
+  })
   async function searchByBarcode() {
     const barcode = document.getElementById("barcode").value.trim();
 
@@ -101,7 +107,6 @@
       alert("Please enter Barcode.");
       return;
     }
-
     fetchAndDisplay({ barcode });
   }
 
